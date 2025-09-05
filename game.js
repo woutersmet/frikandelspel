@@ -2,6 +2,80 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
+// Sound system
+const sounds = {
+    walking: new Audio('geluid_lopen.m4a'),
+    jumping: new Audio('geluid_springen.m4a'),
+    death: new Audio('geluid_dood.mp3'),
+    levelComplete: new Audio('geluid_level_gedaan.mp3')
+};
+
+// Configure sound settings
+sounds.walking.loop = true;
+sounds.walking.volume = 0.3;
+sounds.jumping.volume = 0.5;
+sounds.death.volume = 0.7;
+sounds.levelComplete.volume = 0.8;
+
+// Sound state tracking
+let isWalkingSoundPlaying = false;
+let soundEnabled = true;
+
+// Sound helper functions
+function playSound(soundName) {
+    if (!soundEnabled) return;
+    try {
+        const sound = sounds[soundName];
+        if (sound) {
+            sound.currentTime = 0; // Reset to beginning
+            sound.play().catch(e => console.log('Sound play failed:', e));
+        }
+    } catch (e) {
+        console.log('Sound error:', e);
+    }
+}
+
+function stopSound(soundName) {
+    try {
+        const sound = sounds[soundName];
+        if (sound) {
+            sound.pause();
+            sound.currentTime = 0;
+        }
+    } catch (e) {
+        console.log('Sound stop error:', e);
+    }
+}
+
+function playWalkingSound() {
+    if (!soundEnabled) return;
+    if (!isWalkingSoundPlaying) {
+        isWalkingSoundPlaying = true;
+        sounds.walking.play().catch(e => console.log('Walking sound failed:', e));
+    }
+}
+
+function stopWalkingSound() {
+    if (isWalkingSoundPlaying) {
+        isWalkingSoundPlaying = false;
+        sounds.walking.pause();
+        sounds.walking.currentTime = 0;
+    }
+}
+
+function toggleSound() {
+    soundEnabled = !soundEnabled;
+    if (!soundEnabled) {
+        // Stop all currently playing sounds
+        stopWalkingSound();
+        Object.keys(sounds).forEach(soundName => {
+            if (soundName !== 'walking') {
+                stopSound(soundName);
+            }
+        });
+    }
+}
+
 // Game variabelen
 const GRAVITY = 0.5;
 const JUMP_FORCE = -12;
@@ -148,6 +222,42 @@ document.addEventListener('keyup', (e) => {
     keys[e.code] = false;
 });
 
+// Mouse click handling for sound button
+canvas.addEventListener('click', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    // Sound button area (top right corner)
+    const buttonX = canvas.width - 50;
+    const buttonY = 10;
+    const buttonSize = 35;
+
+    if (x >= buttonX && x <= buttonX + buttonSize &&
+        y >= buttonY && y <= buttonY + buttonSize) {
+        toggleSound();
+    }
+});
+
+// Mouse move handling for cursor change
+canvas.addEventListener('mousemove', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    // Sound button area (top right corner)
+    const buttonX = canvas.width - 50;
+    const buttonY = 10;
+    const buttonSize = 35;
+
+    if (x >= buttonX && x <= buttonX + buttonSize &&
+        y >= buttonY && y <= buttonY + buttonSize) {
+        canvas.style.cursor = 'pointer';
+    } else {
+        canvas.style.cursor = 'default';
+    }
+});
+
 // Collision detection
 function checkCollision(rect1, rect2) {
     return rect1.x < rect2.x + rect2.width &&
@@ -158,6 +268,9 @@ function checkCollision(rect1, rect2) {
 
 // Level management
 function loadLevel(levelNum) {
+    // Stop all sounds when loading new level
+    stopWalkingSound();
+
     currentLevel = levelNum;
     ground = levels[currentLevel].ground;
     walls = levels[currentLevel].walls;
@@ -190,18 +303,30 @@ function updateLasers() {
 // Update speler positie en physics
 function updatePlayer() {
     // Horizontale beweging
+    let isMoving = false;
     if (keys['ArrowLeft']) {
         player.velocityX = -MOVE_SPEED;
+        isMoving = true;
     } else if (keys['ArrowRight']) {
         player.velocityX = MOVE_SPEED;
+        isMoving = true;
     } else {
         player.velocityX *= 0.8; // Wrijving
     }
-    
+
+    // Walking sound management
+    if (isMoving && player.onGround && Math.abs(player.velocityX) > 1) {
+        playWalkingSound();
+    } else {
+        stopWalkingSound();
+    }
+
     // Springen
     if (keys['Space'] && player.onGround) {
         player.velocityY = JUMP_FORCE;
         player.onGround = false;
+        playSound('jumping');
+        stopWalkingSound(); // Stop walking sound when jumping
     }
     
     // Zwaartekracht toepassen
@@ -283,8 +408,12 @@ function updatePlayer() {
     
     // Check collision met deurtje
     if (checkCollision(player, door)) {
+        playSound('levelComplete');
+        stopWalkingSound();
         if (currentLevel < 3) {
-            loadLevel(currentLevel + 1);
+            setTimeout(() => {
+                loadLevel(currentLevel + 1);
+            }, 500); // Small delay to let sound play
         } else {
             // Spel gewonnen!
             levelComplete = true;
@@ -297,6 +426,10 @@ function updatePlayer() {
             if (laser.active) {
                 const laserRect = { x: laser.x, y: 0, width: 10, height: 550 };
                 if (checkCollision(player, laserRect)) {
+                    // Play death sound and stop walking
+                    playSound('death');
+                    stopWalkingSound();
+
                     // Reset naar begin van level
                     player.x = 100;
                     player.y = 400;
@@ -310,6 +443,8 @@ function updatePlayer() {
 
     // Als speler valt, reset positie
     if (player.y > canvas.height) {
+        playSound('death');
+        stopWalkingSound();
         player.x = 100;
         player.y = 400;
         player.velocityX = 0;
@@ -466,6 +601,31 @@ function draw() {
     ctx.fillStyle = 'white';
     ctx.font = '20px Arial';
     ctx.fillText(`Level ${currentLevel}`, 20, 30);
+
+    // Teken sound toggle button (top right corner)
+    const buttonX = canvas.width - 50;
+    const buttonY = 10;
+    const buttonSize = 35;
+
+    // Button background
+    ctx.fillStyle = soundEnabled ? 'rgba(255, 255, 255, 0.2)' : 'rgba(255, 0, 0, 0.3)';
+    ctx.fillRect(buttonX, buttonY, buttonSize, buttonSize);
+
+    // Button border
+    ctx.strokeStyle = 'white';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(buttonX, buttonY, buttonSize, buttonSize);
+
+    // Sound icon
+    ctx.fillStyle = 'white';
+    ctx.font = '20px Arial';
+    ctx.textAlign = 'center';
+    if (soundEnabled) {
+        ctx.fillText('🔊', buttonX + buttonSize/2, buttonY + buttonSize/2 + 7);
+    } else {
+        ctx.fillText('🔇', buttonX + buttonSize/2, buttonY + buttonSize/2 + 7);
+    }
+    ctx.textAlign = 'left'; // Reset text alignment
 
     // Teken easter egg status
     if (player.isDrogeWorst) {
