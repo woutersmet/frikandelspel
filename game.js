@@ -271,6 +271,7 @@ function loadLevel(levelNum) {
     // Stop all sounds when loading new level
     stopWalkingSound();
 
+    console.log(`Loading level ${levelNum}`);
     currentLevel = levelNum;
     ground = levels[currentLevel].ground;
     walls = levels[currentLevel].walls;
@@ -285,6 +286,7 @@ function loadLevel(levelNum) {
     player.velocityY = 0;
     cameraX = 0;
     levelComplete = false;
+    console.log(`Level ${currentLevel} loaded successfully`);
 }
 
 // Update lasers (voor level 2 en 3)
@@ -325,7 +327,7 @@ function updatePlayer() {
     if (keys['Space'] && player.onGround) {
         player.velocityY = JUMP_FORCE;
         player.onGround = false;
-        playSound('jumping');
+        // playSound('jumping');
         stopWalkingSound(); // Stop walking sound when jumping
     }
     
@@ -408,11 +410,13 @@ function updatePlayer() {
     
     // Check collision met deurtje
     if (checkCollision(player, door)) {
-        playSound('levelComplete');
+        // playSound('levelComplete');
         stopWalkingSound();
         if (currentLevel < 3) {
+            const nextLevel = currentLevel + 1;
+            console.log(`Level ${currentLevel} completed! Moving to level ${nextLevel}`);
             setTimeout(() => {
-                loadLevel(currentLevel + 1);
+                loadLevel(nextLevel);
             }, 500); // Small delay to let sound play
         } else {
             // Spel gewonnen!
@@ -427,7 +431,7 @@ function updatePlayer() {
                 const laserRect = { x: laser.x, y: 0, width: 10, height: 550 };
                 if (checkCollision(player, laserRect)) {
                     // Play death sound and stop walking
-                    playSound('death');
+                    // playSound('death');
                     stopWalkingSound();
 
                     // Reset naar begin van level
@@ -443,7 +447,7 @@ function updatePlayer() {
 
     // Als speler valt, reset positie
     if (player.y > canvas.height) {
-        playSound('death');
+        // playSound('death');
         stopWalkingSound();
         player.x = 100;
         player.y = 400;
