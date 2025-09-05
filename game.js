@@ -10,29 +10,29 @@ const MOVE_SPEED = 5;
 // Camera variabelen
 let cameraX = 0;
 
-// Speler object
+// Speler object (frikandel)
 const player = {
     x: 100,
     y: 400,
-    width: 30,
-    height: 40,
+    width: 20,
+    height: 45,
     velocityX: 0,
     velocityY: 0,
     onGround: false,
-    color: '#FF6B6B'
+    color: '#8B4513' // Bruine kleur voor frikandel
 };
 
 // Grond en muren array
 const ground = { x: 0, y: 550, width: 2000, height: 50, color: '#4ECDC4' };
 
-// Verticale muren om overheen te springen
+// Verticale muren om overheen te springen (lager zodat je erover kunt springen)
 const walls = [
-    { x: 250, y: 450, width: 20, height: 100, color: '#45B7D1' },
-    { x: 400, y: 400, width: 20, height: 150, color: '#45B7D1' },
-    { x: 550, y: 420, width: 20, height: 130, color: '#45B7D1' },
-    { x: 700, y: 380, width: 20, height: 170, color: '#45B7D1' },
-    { x: 850, y: 450, width: 20, height: 100, color: '#45B7D1' },
-    { x: 1000, y: 400, width: 20, height: 150, color: '#45B7D1' }
+    { x: 250, y: 480, width: 20, height: 70, color: '#DC143C' },
+    { x: 400, y: 470, width: 20, height: 80, color: '#DC143C' },
+    { x: 550, y: 485, width: 20, height: 65, color: '#DC143C' },
+    { x: 700, y: 475, width: 20, height: 75, color: '#DC143C' },
+    { x: 850, y: 480, width: 20, height: 70, color: '#DC143C' },
+    { x: 1000, y: 470, width: 20, height: 80, color: '#DC143C' }
 ];
 
 // Input handling
@@ -162,17 +162,34 @@ function draw() {
         }
     });
 
-    // Teken speler
+    // Teken speler als ronde frikandel
     ctx.fillStyle = player.color;
-    ctx.fillRect(player.x, player.y, player.width, player.height);
+    ctx.beginPath();
+    ctx.ellipse(
+        player.x + player.width/2,
+        player.y + player.height/2,
+        player.width/2,
+        player.height/2,
+        0, 0, 2 * Math.PI
+    );
+    ctx.fill();
 
-    // Voeg ogen toe aan speler
+    // Voeg ogen toe aan frikandel
     ctx.fillStyle = 'white';
-    ctx.fillRect(player.x + 5, player.y + 8, 6, 6);
-    ctx.fillRect(player.x + 19, player.y + 8, 6, 6);
+    ctx.beginPath();
+    ctx.arc(player.x + 6, player.y + 15, 2.5, 0, 2 * Math.PI);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(player.x + 14, player.y + 15, 2.5, 0, 2 * Math.PI);
+    ctx.fill();
+
     ctx.fillStyle = 'black';
-    ctx.fillRect(player.x + 7, player.y + 10, 2, 2);
-    ctx.fillRect(player.x + 21, player.y + 10, 2, 2);
+    ctx.beginPath();
+    ctx.arc(player.x + 6, player.y + 15, 1, 0, 2 * Math.PI);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(player.x + 14, player.y + 15, 1, 0, 2 * Math.PI);
+    ctx.fill();
 
     // Restore context
     ctx.restore();
