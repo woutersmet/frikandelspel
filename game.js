@@ -7,6 +7,9 @@ const GRAVITY = 0.5;
 const JUMP_FORCE = -12;
 const MOVE_SPEED = 5;
 
+// Camera variabelen
+let cameraX = 0;
+
 // Speler object
 const player = {
     x: 100,
@@ -19,15 +22,17 @@ const player = {
     color: '#FF6B6B'
 };
 
-// Muren/platforms array
+// Grond en muren array
+const ground = { x: 0, y: 550, width: 2000, height: 50, color: '#4ECDC4' };
+
+// Verticale muren om overheen te springen
 const walls = [
-    { x: 0, y: 550, width: 800, height: 50, color: '#4ECDC4' }, // Grond
-    { x: 200, y: 450, width: 100, height: 20, color: '#45B7D1' },
-    { x: 400, y: 350, width: 100, height: 20, color: '#45B7D1' },
-    { x: 600, y: 250, width: 100, height: 20, color: '#45B7D1' },
-    { x: 300, y: 200, width: 150, height: 20, color: '#45B7D1' },
-    { x: 550, y: 150, width: 100, height: 20, color: '#45B7D1' },
-    { x: 100, y: 100, width: 120, height: 20, color: '#45B7D1' }
+    { x: 250, y: 450, width: 20, height: 100, color: '#45B7D1' },
+    { x: 400, y: 400, width: 20, height: 150, color: '#45B7D1' },
+    { x: 550, y: 420, width: 20, height: 130, color: '#45B7D1' },
+    { x: 700, y: 380, width: 20, height: 170, color: '#45B7D1' },
+    { x: 850, y: 450, width: 20, height: 100, color: '#45B7D1' },
+    { x: 1000, y: 400, width: 20, height: 150, color: '#45B7D1' }
 ];
 
 // Input handling
@@ -75,23 +80,21 @@ function updatePlayer() {
     
     // Reset onGround status
     player.onGround = false;
-    
-    // Collision detection met muren
+
+    // Collision detection met grond
+    if (checkCollision(player, ground)) {
+        if (player.velocityY > 0 && player.y < ground.y) {
+            player.y = ground.y - player.height;
+            player.velocityY = 0;
+            player.onGround = true;
+        }
+    }
+
+    // Collision detection met verticale muren (blokkeren beweging)
     for (let wall of walls) {
         if (checkCollision(player, wall)) {
-            // Van boven op platform landen
-            if (player.velocityY > 0 && player.y < wall.y) {
-                player.y = wall.y - player.height;
-                player.velocityY = 0;
-                player.onGround = true;
-            }
-            // Van onder tegen platform
-            else if (player.velocityY < 0 && player.y > wall.y) {
-                player.y = wall.y + wall.height;
-                player.velocityY = 0;
-            }
             // Van links tegen muur
-            else if (player.velocityX > 0 && player.x < wall.x) {
+            if (player.velocityX > 0 && player.x < wall.x) {
                 player.x = wall.x - player.width;
                 player.velocityX = 0;
             }
@@ -103,13 +106,18 @@ function updatePlayer() {
         }
     }
     
-    // Grenzen van het canvas
+    // Update camera om speler te volgen
+    cameraX = player.x - canvas.width / 2;
+    if (cameraX < 0) cameraX = 0;
+    if (cameraX > ground.width - canvas.width) cameraX = ground.width - canvas.width;
+
+    // Grenzen van de wereld
     if (player.x < 0) {
         player.x = 0;
         player.velocityX = 0;
     }
-    if (player.x + player.width > canvas.width) {
-        player.x = canvas.width - player.width;
+    if (player.x + player.width > ground.width) {
+        player.x = ground.width - player.width;
         player.velocityX = 0;
     }
     
@@ -130,25 +138,34 @@ function draw() {
     gradient.addColorStop(1, '#E0F6FF');
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
-    // Teken muren/platforms
+
+    // Save context voor camera transformatie
+    ctx.save();
+    ctx.translate(-cameraX, 0);
+
+    // Teken grond
+    ctx.fillStyle = 'rgba(0,0,0,0.2)';
+    ctx.fillRect(ground.x + 2, ground.y + 2, ground.width, ground.height);
+    ctx.fillStyle = ground.color;
+    ctx.fillRect(ground.x, ground.y, ground.width, ground.height);
+
+    // Teken verticale muren (alleen die zichtbaar zijn)
     walls.forEach(wall => {
-        ctx.fillStyle = wall.color;
-        ctx.fillRect(wall.x, wall.y, wall.width, wall.height);
-        
-        // Voeg wat schaduw toe
-        ctx.fillStyle = 'rgba(0,0,0,0.2)';
-        ctx.fillRect(wall.x + 2, wall.y + 2, wall.width, wall.height);
-        
-        // Teken de muur weer
-        ctx.fillStyle = wall.color;
-        ctx.fillRect(wall.x, wall.y, wall.width, wall.height);
+        if (wall.x + wall.width > cameraX && wall.x < cameraX + canvas.width) {
+            // Voeg wat schaduw toe
+            ctx.fillStyle = 'rgba(0,0,0,0.2)';
+            ctx.fillRect(wall.x + 2, wall.y + 2, wall.width, wall.height);
+
+            // Teken de muur
+            ctx.fillStyle = wall.color;
+            ctx.fillRect(wall.x, wall.y, wall.width, wall.height);
+        }
     });
-    
+
     // Teken speler
     ctx.fillStyle = player.color;
     ctx.fillRect(player.x, player.y, player.width, player.height);
-    
+
     // Voeg ogen toe aan speler
     ctx.fillStyle = 'white';
     ctx.fillRect(player.x + 5, player.y + 8, 6, 6);
@@ -156,6 +173,9 @@ function draw() {
     ctx.fillStyle = 'black';
     ctx.fillRect(player.x + 7, player.y + 10, 2, 2);
     ctx.fillRect(player.x + 21, player.y + 10, 2, 2);
+
+    // Restore context
+    ctx.restore();
 }
 
 // Game loop
