@@ -23,7 +23,8 @@ const player = {
     velocityX: 0,
     velocityY: 0,
     onGround: false,
-    color: '#9069caff' // Bruine kleur voor frikandel
+    color: '#9069caff', // Bruine kleur voor frikandel
+    isDrogeWorst: false // Easter egg state
 };
 
 // Level data
@@ -97,8 +98,50 @@ let lasers = levels[currentLevel].lasers;
 // Input handling
 const keys = {};
 
+// Konami code easter egg
+const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'KeyB', 'KeyA'];
+let konamiSequence = [];
+let konamiActivated = false;
+
 document.addEventListener('keydown', (e) => {
     keys[e.code] = true;
+
+    // Check for Konami code sequence
+    if (!konamiActivated) {
+        konamiSequence.push(e.code);
+
+        // Keep only the last 10 keys
+        if (konamiSequence.length > konamiCode.length) {
+            konamiSequence.shift();
+        }
+
+        // Check if sequence matches Konami code
+        if (konamiSequence.length === konamiCode.length) {
+            let matches = true;
+            for (let i = 0; i < konamiCode.length; i++) {
+                if (konamiSequence[i] !== konamiCode[i]) {
+                    matches = false;
+                    break;
+                }
+            }
+
+            if (matches) {
+                konamiActivated = true;
+                player.isDrogeWorst = true;
+                player.color = '#8B4513'; // Darker brown for droge worst
+                console.log('🌭➡️🥩 KONAMI CODE ACTIVATED! Frikandel transformed into Droge Worst!');
+            }
+        }
+    }
+
+    // Reset easter egg with R key
+    if (e.code === 'KeyR' && konamiActivated) {
+        konamiActivated = false;
+        player.isDrogeWorst = false;
+        player.color = '#9069caff'; // Reset to original frikandel color
+        konamiSequence = [];
+        console.log('🥩➡️🌭 Easter egg reset! Back to normal frikandel!');
+    }
 });
 
 document.addEventListener('keyup', (e) => {
@@ -358,34 +401,63 @@ function draw() {
         });
     }
 
-    // Teken speler als ronde frikandel
-    ctx.fillStyle = player.color;
-    ctx.beginPath();
-    ctx.ellipse(
-        player.x + player.width/2,
-        player.y + player.height/2,
-        player.width/2,
-        player.height/2,
-        0, 0, 2 * Math.PI
-    );
-    ctx.fill();
+    // Teken speler als frikandel of droge worst
+    if (player.isDrogeWorst) {
+        // Teken droge worst (meer rechthoekig en donkerder)
+        ctx.fillStyle = player.color;
+        ctx.fillRect(player.x, player.y, player.width, player.height);
 
-    // Voeg ogen toe aan frikandel
-    ctx.fillStyle = 'white';
-    ctx.beginPath();
-    ctx.arc(player.x + 6, player.y + 15, 2.5, 0, 2 * Math.PI);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.arc(player.x + 14, player.y + 15, 2.5, 0, 2 * Math.PI);
-    ctx.fill();
+        // Voeg textuur toe aan droge worst
+        ctx.fillStyle = '#654321';
+        for (let i = 0; i < 3; i++) {
+            ctx.fillRect(player.x + 2, player.y + 5 + i * 12, player.width - 4, 2);
+        }
 
-    ctx.fillStyle = 'black';
-    ctx.beginPath();
-    ctx.arc(player.x + 6, player.y + 15, 1, 0, 2 * Math.PI);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.arc(player.x + 14, player.y + 15, 1, 0, 2 * Math.PI);
-    ctx.fill();
+        // Voeg ogen toe aan droge worst (meer vierkant)
+        ctx.fillStyle = 'white';
+        ctx.fillRect(player.x + 4, player.y + 12, 4, 4);
+        ctx.fillRect(player.x + 12, player.y + 12, 4, 4);
+
+        ctx.fillStyle = 'black';
+        ctx.fillRect(player.x + 5, player.y + 13, 2, 2);
+        ctx.fillRect(player.x + 13, player.y + 13, 2, 2);
+
+        // Voeg "DROGE WORST" label toe
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+        ctx.font = '8px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('DROGE WORST', player.x + player.width/2, player.y - 5);
+        ctx.textAlign = 'left';
+    } else {
+        // Teken normale ronde frikandel
+        ctx.fillStyle = player.color;
+        ctx.beginPath();
+        ctx.ellipse(
+            player.x + player.width/2,
+            player.y + player.height/2,
+            player.width/2,
+            player.height/2,
+            0, 0, 2 * Math.PI
+        );
+        ctx.fill();
+
+        // Voeg ogen toe aan frikandel
+        ctx.fillStyle = 'white';
+        ctx.beginPath();
+        ctx.arc(player.x + 6, player.y + 15, 2.5, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(player.x + 14, player.y + 15, 2.5, 0, 2 * Math.PI);
+        ctx.fill();
+
+        ctx.fillStyle = 'black';
+        ctx.beginPath();
+        ctx.arc(player.x + 6, player.y + 15, 1, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(player.x + 14, player.y + 15, 1, 0, 2 * Math.PI);
+        ctx.fill();
+    }
 
     // Restore context
     ctx.restore();
@@ -394,6 +466,13 @@ function draw() {
     ctx.fillStyle = 'white';
     ctx.font = '20px Arial';
     ctx.fillText(`Level ${currentLevel}`, 20, 30);
+
+    // Teken easter egg status
+    if (player.isDrogeWorst) {
+        ctx.fillStyle = '#FFD700'; // Gouden kleur voor easter egg
+        ctx.font = '16px Arial';
+        ctx.fillText('🥩 DROGE WORST MODE! 🥩', 20, 60);
+    }
 
     if (levelComplete && currentLevel === 3) {
         ctx.fillStyle = 'rgba(0,0,0,0.7)';
