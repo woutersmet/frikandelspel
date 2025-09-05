@@ -10,6 +10,10 @@ const MOVE_SPEED = 5;
 // Camera variabelen
 let cameraX = 0;
 
+// Level systeem
+let currentLevel = 1;
+let levelComplete = false;
+
 // Speler object (frikandel)
 const player = {
     x: 100,
@@ -22,18 +26,47 @@ const player = {
     color: '#8B4513' // Bruine kleur voor frikandel
 };
 
-// Grond en muren array
-const ground = { x: 0, y: 550, width: 2000, height: 50, color: '#4ECDC4' };
+// Level data
+const levels = {
+    1: {
+        ground: { x: 0, y: 550, width: 1400, height: 50, color: '#4ECDC4' },
+        walls: [
+            { x: 250, y: 480, width: 20, height: 70, color: '#DC143C' },
+            { x: 400, y: 470, width: 20, height: 80, color: '#DC143C' },
+            { x: 550, y: 485, width: 20, height: 65, color: '#DC143C' },
+            { x: 700, y: 475, width: 20, height: 75, color: '#DC143C' },
+            { x: 850, y: 480, width: 20, height: 70, color: '#DC143C' },
+            { x: 1000, y: 470, width: 20, height: 80, color: '#DC143C' }
+        ],
+        door: { x: 1300, y: 480, width: 40, height: 70, color: '#8B4513' },
+        lasers: []
+    },
+    2: {
+        ground: { x: 0, y: 550, width: 2000, height: 50, color: '#4ECDC4' },
+        walls: [
+            { x: 200, y: 480, width: 20, height: 70, color: '#DC143C' },
+            { x: 450, y: 470, width: 20, height: 80, color: '#DC143C' },
+            { x: 700, y: 485, width: 20, height: 65, color: '#DC143C' },
+            { x: 950, y: 475, width: 20, height: 75, color: '#DC143C' },
+            { x: 1200, y: 480, width: 20, height: 70, color: '#DC143C' },
+            { x: 1450, y: 470, width: 20, height: 80, color: '#DC143C' }
+        ],
+        door: { x: 1850, y: 480, width: 40, height: 70, color: '#8B4513' },
+        lasers: [
+            { x: 300, active: false, timer: 0, interval: 120 },
+            { x: 500, active: false, timer: 60, interval: 120 },
+            { x: 800, active: false, timer: 30, interval: 120 },
+            { x: 1100, active: false, timer: 90, interval: 120 },
+            { x: 1350, active: false, timer: 45, interval: 120 }
+        ]
+    }
+};
 
-// Verticale muren om overheen te springen (lager zodat je erover kunt springen)
-const walls = [
-    { x: 250, y: 480, width: 20, height: 70, color: '#DC143C' },
-    { x: 400, y: 470, width: 20, height: 80, color: '#DC143C' },
-    { x: 550, y: 485, width: 20, height: 65, color: '#DC143C' },
-    { x: 700, y: 475, width: 20, height: 75, color: '#DC143C' },
-    { x: 850, y: 480, width: 20, height: 70, color: '#DC143C' },
-    { x: 1000, y: 470, width: 20, height: 80, color: '#DC143C' }
-];
+// Huidige level data
+let ground = levels[currentLevel].ground;
+let walls = levels[currentLevel].walls;
+let door = levels[currentLevel].door;
+let lasers = levels[currentLevel].lasers;
 
 // Input handling
 const keys = {};
@@ -52,6 +85,36 @@ function checkCollision(rect1, rect2) {
            rect1.x + rect1.width > rect2.x &&
            rect1.y < rect2.y + rect2.height &&
            rect1.y + rect1.height > rect2.y;
+}
+
+// Level management
+function loadLevel(levelNum) {
+    currentLevel = levelNum;
+    ground = levels[currentLevel].ground;
+    walls = levels[currentLevel].walls;
+    door = levels[currentLevel].door;
+    lasers = levels[currentLevel].lasers;
+
+    // Reset speler positie
+    player.x = 100;
+    player.y = 400;
+    player.velocityX = 0;
+    player.velocityY = 0;
+    cameraX = 0;
+    levelComplete = false;
+}
+
+// Update lasers (alleen voor level 2)
+function updateLasers() {
+    if (currentLevel !== 2) return;
+
+    lasers.forEach(laser => {
+        laser.timer++;
+        if (laser.timer >= laser.interval) {
+            laser.active = !laser.active;
+            laser.timer = 0;
+        }
+    });
 }
 
 // Update speler positie en physics
@@ -121,12 +184,40 @@ function updatePlayer() {
         player.velocityX = 0;
     }
     
+    // Check collision met deurtje
+    if (checkCollision(player, door)) {
+        if (currentLevel < 2) {
+            loadLevel(currentLevel + 1);
+        } else {
+            // Spel gewonnen!
+            levelComplete = true;
+        }
+    }
+
+    // Check collision met actieve lasers (level 2)
+    if (currentLevel === 2) {
+        lasers.forEach(laser => {
+            if (laser.active) {
+                const laserRect = { x: laser.x, y: 0, width: 10, height: 550 };
+                if (checkCollision(player, laserRect)) {
+                    // Reset naar begin van level
+                    player.x = 100;
+                    player.y = 400;
+                    player.velocityX = 0;
+                    player.velocityY = 0;
+                    cameraX = 0;
+                }
+            }
+        });
+    }
+
     // Als speler valt, reset positie
     if (player.y > canvas.height) {
         player.x = 100;
         player.y = 400;
         player.velocityX = 0;
         player.velocityY = 0;
+        cameraX = 0;
     }
 }
 
@@ -162,6 +253,44 @@ function draw() {
         }
     });
 
+    // Teken deurtje
+    if (door.x + door.width > cameraX && door.x < cameraX + canvas.width) {
+        // Schaduw
+        ctx.fillStyle = 'rgba(0,0,0,0.2)';
+        ctx.fillRect(door.x + 2, door.y + 2, door.width, door.height);
+
+        // Deur
+        ctx.fillStyle = door.color;
+        ctx.fillRect(door.x, door.y, door.width, door.height);
+
+        // Deurknop
+        ctx.fillStyle = '#FFD700';
+        ctx.beginPath();
+        ctx.arc(door.x + door.width - 8, door.y + door.height/2, 3, 0, 2 * Math.PI);
+        ctx.fill();
+    }
+
+    // Teken lasers (level 2)
+    if (currentLevel === 2) {
+        lasers.forEach(laser => {
+            if (laser.x + 10 > cameraX && laser.x < cameraX + canvas.width) {
+                if (laser.active) {
+                    // Actieve laser - rood
+                    ctx.fillStyle = '#FF0000';
+                    ctx.fillRect(laser.x, 0, 10, 550);
+
+                    // Laser glow effect
+                    ctx.fillStyle = 'rgba(255,0,0,0.3)';
+                    ctx.fillRect(laser.x - 5, 0, 20, 550);
+                } else {
+                    // Inactieve laser - donkerrood
+                    ctx.fillStyle = '#800000';
+                    ctx.fillRect(laser.x + 3, 0, 4, 550);
+                }
+            }
+        });
+    }
+
     // Teken speler als ronde frikandel
     ctx.fillStyle = player.color;
     ctx.beginPath();
@@ -193,10 +322,28 @@ function draw() {
 
     // Restore context
     ctx.restore();
+
+    // Teken level info
+    ctx.fillStyle = 'white';
+    ctx.font = '20px Arial';
+    ctx.fillText(`Level ${currentLevel}`, 20, 30);
+
+    if (levelComplete && currentLevel === 2) {
+        ctx.fillStyle = 'rgba(0,0,0,0.7)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = 'white';
+        ctx.font = '40px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('🎉 GEFELICITEERD! 🎉', canvas.width/2, canvas.height/2 - 20);
+        ctx.font = '20px Arial';
+        ctx.fillText('Je hebt alle levels voltooid!', canvas.width/2, canvas.height/2 + 20);
+        ctx.textAlign = 'left';
+    }
 }
 
 // Game loop
 function gameLoop() {
+    updateLasers();
     updatePlayer();
     draw();
     requestAnimationFrame(gameLoop);
