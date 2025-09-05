@@ -2,6 +2,8 @@
 
 Een leuk platform spelletje waar je een frikandel bestuurt die over muren moet springen en levels moet voltooien!
 
+Vibe coded door de dochter met beetje typen hulp van papa.
+
 ## 🎮 Hoe te spelen
 
 - **Pijltjestoetsen ← →**: Beweeg de frikandel links en rechts
