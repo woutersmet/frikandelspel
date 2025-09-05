@@ -65,9 +65,34 @@ Een leuk platform spelletje waar je een frikandel bestuurt die over muren moet s
 - [ ] Animaties en particle effects
 - [ ] Vijanden en bewegende obstakels
 
-## 🤝 Bijdragen
+## 🤝 Contributing
 
-Voel je vrij om issues te openen of pull requests te maken voor verbeteringen!
+We welcome contributions! This is an **open source project** and we'd love your help to make it even better.
+
+### 🎯 Ways to Contribute
+- 🆕 **New levels** with creative mechanics
+- 🎵 **Sound effects** and music
+- 🎨 **Visual improvements** and animations
+- 📱 **Mobile support** with touch controls
+- 🏆 **Scoring system** and leaderboards
+- 🐛 **Bug fixes** and optimizations
+
+### 🚀 Getting Started
+1. **Fork** this repository
+2. **Clone** your fork locally
+3. **Create a branch** for your feature
+4. **Make your changes** and test locally
+5. **Submit a Pull Request**
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
+
+### 💡 Ideas for New Contributors
+- Add level 4 with moving platforms
+- Implement sound effects for jumping/landing
+- Add particle effects when hitting lasers
+- Create a start screen with instructions
+- Add keyboard shortcuts (R for restart, etc.)
+- Implement different frikandel skins/colors
 
 ## 📄 Licentie
 
