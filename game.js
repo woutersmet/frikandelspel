@@ -23,7 +23,7 @@ const player = {
     velocityX: 0,
     velocityY: 0,
     onGround: false,
-    color: '#8B4513' // Bruine kleur voor frikandel
+    color: '#9069caff' // Bruine kleur voor frikandel
 };
 
 // Level data
@@ -38,6 +38,7 @@ const levels = {
             { x: 850, y: 480, width: 20, height: 70, color: '#DC143C' },
             { x: 1000, y: 470, width: 20, height: 80, color: '#DC143C' }
         ],
+        platforms: [],
         door: { x: 1300, y: 480, width: 40, height: 70, color: '#8B4513' },
         lasers: []
     },
@@ -51,6 +52,7 @@ const levels = {
             { x: 1200, y: 480, width: 20, height: 70, color: '#DC143C' },
             { x: 1450, y: 470, width: 20, height: 80, color: '#DC143C' }
         ],
+        platforms: [],
         door: { x: 1850, y: 480, width: 40, height: 70, color: '#8B4513' },
         lasers: [
             { x: 300, active: false, timer: 0, interval: 120 },
@@ -59,12 +61,36 @@ const levels = {
             { x: 1100, active: false, timer: 90, interval: 120 },
             { x: 1350, active: false, timer: 45, interval: 120 }
         ]
+    },
+    3: {
+        ground: { x: 0, y: 550, width: 2200, height: 50, color: '#4ECDC4' },
+        walls: [
+            { x: 300, y: 480, width: 20, height: 70, color: '#DC143C' },
+            { x: 800, y: 470, width: 20, height: 80, color: '#DC143C' },
+            { x: 1400, y: 485, width: 20, height: 65, color: '#DC143C' }
+        ],
+        platforms: [
+            { x: 200, y: 450, width: 120, height: 20, color: '#45B7D1' },
+            { x: 450, y: 380, width: 150, height: 20, color: '#45B7D1' },
+            { x: 700, y: 320, width: 140, height: 20, color: '#45B7D1' },
+            { x: 950, y: 250, width: 160, height: 20, color: '#45B7D1' },
+            { x: 1200, y: 180, width: 150, height: 20, color: '#45B7D1' },
+            { x: 1500, y: 300, width: 140, height: 20, color: '#45B7D1' },
+            { x: 1800, y: 200, width: 120, height: 20, color: '#45B7D1' }
+        ],
+        door: { x: 1830, y: 130, width: 40, height: 70, color: '#8B4513' }, // Hoog op platform
+        lasers: [
+            { x: 350, active: false, timer: 0, interval: 150 },
+            { x: 650, active: false, timer: 75, interval: 150 },
+            { x: 1100, active: false, timer: 50, interval: 150 }
+        ]
     }
 };
 
 // Huidige level data
 let ground = levels[currentLevel].ground;
 let walls = levels[currentLevel].walls;
+let platforms = levels[currentLevel].platforms;
 let door = levels[currentLevel].door;
 let lasers = levels[currentLevel].lasers;
 
@@ -92,6 +118,7 @@ function loadLevel(levelNum) {
     currentLevel = levelNum;
     ground = levels[currentLevel].ground;
     walls = levels[currentLevel].walls;
+    platforms = levels[currentLevel].platforms;
     door = levels[currentLevel].door;
     lasers = levels[currentLevel].lasers;
 
@@ -104,9 +131,9 @@ function loadLevel(levelNum) {
     levelComplete = false;
 }
 
-// Update lasers (alleen voor level 2)
+// Update lasers (voor level 2 en 3)
 function updateLasers() {
-    if (currentLevel !== 2) return;
+    if (currentLevel !== 2 && currentLevel !== 3) return;
 
     lasers.forEach(laser => {
         laser.timer++;
@@ -153,6 +180,33 @@ function updatePlayer() {
         }
     }
 
+    // Collision detection met platforms
+    platforms.forEach(platform => {
+        if (checkCollision(player, platform)) {
+            // Van boven op platform landen
+            if (player.velocityY > 0 && player.y < platform.y) {
+                player.y = platform.y - player.height;
+                player.velocityY = 0;
+                player.onGround = true;
+            }
+            // Van onder tegen platform
+            else if (player.velocityY < 0 && player.y > platform.y) {
+                player.y = platform.y + platform.height;
+                player.velocityY = 0;
+            }
+            // Van links tegen platform
+            else if (player.velocityX > 0 && player.x < platform.x) {
+                player.x = platform.x - player.width;
+                player.velocityX = 0;
+            }
+            // Van rechts tegen platform
+            else if (player.velocityX < 0 && player.x > platform.x) {
+                player.x = platform.x + platform.width;
+                player.velocityX = 0;
+            }
+        }
+    });
+
     // Collision detection met verticale muren (blokkeren beweging)
     for (let wall of walls) {
         if (checkCollision(player, wall)) {
@@ -186,7 +240,7 @@ function updatePlayer() {
     
     // Check collision met deurtje
     if (checkCollision(player, door)) {
-        if (currentLevel < 2) {
+        if (currentLevel < 3) {
             loadLevel(currentLevel + 1);
         } else {
             // Spel gewonnen!
@@ -194,8 +248,8 @@ function updatePlayer() {
         }
     }
 
-    // Check collision met actieve lasers (level 2)
-    if (currentLevel === 2) {
+    // Check collision met actieve lasers (level 2 en 3)
+    if (currentLevel === 2 || currentLevel === 3) {
         lasers.forEach(laser => {
             if (laser.active) {
                 const laserRect = { x: laser.x, y: 0, width: 10, height: 550 };
@@ -253,6 +307,19 @@ function draw() {
         }
     });
 
+    // Teken platforms (alleen die zichtbaar zijn)
+    platforms.forEach(platform => {
+        if (platform.x + platform.width > cameraX && platform.x < cameraX + canvas.width) {
+            // Voeg wat schaduw toe
+            ctx.fillStyle = 'rgba(0,0,0,0.2)';
+            ctx.fillRect(platform.x + 2, platform.y + 2, platform.width, platform.height);
+
+            // Teken het platform
+            ctx.fillStyle = platform.color;
+            ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
+        }
+    });
+
     // Teken deurtje
     if (door.x + door.width > cameraX && door.x < cameraX + canvas.width) {
         // Schaduw
@@ -270,8 +337,8 @@ function draw() {
         ctx.fill();
     }
 
-    // Teken lasers (level 2)
-    if (currentLevel === 2) {
+    // Teken lasers (level 2 en 3)
+    if (currentLevel === 2 || currentLevel === 3) {
         lasers.forEach(laser => {
             if (laser.x + 10 > cameraX && laser.x < cameraX + canvas.width) {
                 if (laser.active) {
@@ -328,7 +395,7 @@ function draw() {
     ctx.font = '20px Arial';
     ctx.fillText(`Level ${currentLevel}`, 20, 30);
 
-    if (levelComplete && currentLevel === 2) {
+    if (levelComplete && currentLevel === 3) {
         ctx.fillStyle = 'rgba(0,0,0,0.7)';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.fillStyle = 'white';
