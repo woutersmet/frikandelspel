@@ -1,15 +1,25 @@
 # 🌭 Frikandel Spel
 
-Een leuk platform spelletje waar je een frikandel bestuurt die over muren moet springen!
+Een leuk platform spelletje waar je een frikandel bestuurt die over muren moet springen en levels moet voltooien!
 
 ## 🎮 Hoe te spelen
 
 - **Pijltjestoetsen ← →**: Beweeg de frikandel links en rechts
 - **Spatiebalk**: Spring (alleen als je op de grond staat)
-- **Doel**: Spring van platform naar platform en probeer zo hoog mogelijk te komen!
+- **Doel**: Voltooi alle 3 levels door het deurtje te bereiken!
 
-## 🚀 Hoe te starten
+## 🏆 Levels
 
+- **Level 1**: Spring over rode muren en bereik de deur
+- **Level 2**: Ontwijk de knipperende lasers die van boven naar beneden schieten!
+- **Level 3**: Combinatie van platforms, muren EN lasers - de deur is hoog op een platform!
+
+## 🚀 Spelen
+
+### Online spelen (GitHub Pages)
+🎮 **[Speel het spel hier!](https://jouw-username.github.io/vibecoded-game/)**
+
+### Lokaal spelen
 1. Clone deze repository
 2. Start een lokale webserver:
    ```bash
@@ -34,21 +44,26 @@ Een leuk platform spelletje waar je een frikandel bestuurt die over muren moet s
 
 ## 🎯 Features
 
-- ✅ Speler beweging met pijltjestoetsen
-- ✅ Springen met spatiebalk
-- ✅ Zwaartekracht en physics
-- ✅ Collision detection met platforms
-- ✅ Automatische reset bij vallen
-- ✅ Mooie visuele effecten en styling
+- ✅ **3 Uitdagende levels** met verschillende mechanics
+- ✅ **Speler beweging** met pijltjestoetsen
+- ✅ **Springen** met spatiebalk
+- ✅ **Realistische physics** met zwaartekracht
+- ✅ **Collision detection** met muren, platforms en lasers
+- ✅ **Knipperende lasers** die je moet ontwijken
+- ✅ **Platform jumping** in level 3
+- ✅ **Level progressie** systeem
+- ✅ **Camera scrolling** die de speler volgt
+- ✅ **Mooie visuele effecten** en styling
+- ✅ **Automatische deployment** naar GitHub Pages
 
 ## 🔮 Toekomstige features
 
-- [ ] Score systeem
-- [ ] Meer levels
-- [ ] Power-ups
-- [ ] Geluideffecten
-- [ ] Animaties
-- [ ] Vijanden/obstakels
+- [ ] Score systeem en highscores
+- [ ] Meer levels met nieuwe mechanics
+- [ ] Power-ups en collectibles
+- [ ] Geluideffecten en muziek
+- [ ] Animaties en particle effects
+- [ ] Vijanden en bewegende obstakels
 
 ## 🤝 Bijdragen
 
