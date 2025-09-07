@@ -138,7 +138,7 @@ const levels = {
         ]
     },
     3: {
-        ground: { x: 0, y: 550, width: 2200, height: 50, color: '#4ECDC4' },
+        ground: { x: 0, y: 550, width: 2400, height: 50, color: '#4ECDC4' },
         walls: [
             { x: 300, y: 480, width: 20, height: 70, color: '#DC143C' },
             { x: 800, y: 470, width: 20, height: 80, color: '#DC143C' },
@@ -151,9 +151,21 @@ const levels = {
             { x: 950, y: 250, width: 160, height: 20, color: '#45B7D1' },
             { x: 1200, y: 180, width: 150, height: 20, color: '#45B7D1' },
             { x: 1500, y: 300, width: 140, height: 20, color: '#45B7D1' },
-            { x: 1800, y: 200, width: 120, height: 20, color: '#45B7D1' }
+            { x: 1800, y: 200, width: 120, height: 20, color: '#45B7D1' },
+            // Extra platforms aan het einde voor meer sprongmogelijkheden
+            { x: 1950, y: 350, width: 100, height: 20, color: '#45B7D1' },
+            { x: 2080, y: 280, width: 120, height: 20, color: '#45B7D1' },
+            { x: 1920, y: 150, width: 100, height: 20, color: '#45B7D1' },
+            { x: 2050, y: 100, width: 140, height: 20, color: '#45B7D1' },
+            { x: 1750, y: 80, width: 100, height: 20, color: '#45B7D1' },
+            // Platforms dichter bij de grond voor gemakkelijke toegang
+            { x: 1650, y: 480, width: 120, height: 20, color: '#45B7D1' },
+            { x: 1850, y: 420, width: 100, height: 20, color: '#45B7D1' },
+            { x: 2000, y: 460, width: 110, height: 20, color: '#45B7D1' },
+            { x: 2150, y: 400, width: 100, height: 20, color: '#45B7D1' },
+            { x: 2280, y: 350, width: 100, height: 20, color: '#45B7D1' }
         ],
-        door: { x: 1830, y: 130, width: 40, height: 70, color: '#8B4513' }, // Hoog op platform
+        door: { x: 2080, y: 30, width: 40, height: 70, color: '#8B4513' }, // Op het hoogste nieuwe platform
         lasers: [
             { x: 350, active: false, timer: 0, interval: 150 },
             { x: 650, active: false, timer: 75, interval: 150 },

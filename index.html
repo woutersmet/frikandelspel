@@ -7,7 +7,6 @@
     <style>
         body {
             margin: 0;
-            padding: 20px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             font-family: Arial, sans-serif;
             display: flex;
@@ -33,9 +32,8 @@
         .controls {
             color: white;
             text-align: center;
-            margin-top: 20px;
-            background: rgba(255,255,255,0.1);
-            padding: 15px;
+            margin-top: 10px;
+            padding: 5px;
             border-radius: 10px;
             backdrop-filter: blur(10px);
         }
@@ -59,17 +57,12 @@
     <canvas id="gameCanvas" width="800" height="600"></canvas>
     
     <div class="controls">
-        <h3>Besturing:</h3>
         <p>
             <span class="key">←</span> <span class="key">→</span> Lopen
             <span class="key">Spatie</span> Springen
             <span class="key">🔊</span> Geluid aan/uit (klik rechts boven)
         </p>
         <p>Help de frikandel over de muren springen en bereik het deurtje!</p>
-        <p><strong>Level 1:</strong> Spring over de rode muren en bereik de deur</p>
-        <p><strong>Level 2:</strong> Ontwijk de lasers die van boven naar beneden schieten!</p>
-        <p><strong>Level 3:</strong> Combinatie van platforms, muren EN lasers - deur is hoog op een platform!</p>
-        <p><em>🥩 Easter egg:</em> Probeer de Konami code te vinden! <span class="key">R</span> om te resetten</p>
     </div>
     
     <script src="game.js"></script>
