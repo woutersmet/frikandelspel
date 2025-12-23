@@ -4,6 +4,8 @@ Een leuk platform spelletje waar je een frikandel bestuurt die over muren moet s
 
 Vibe coded door de dochter met beetje typen hulp van papa.
 
+Voor geluiden is https://pixabay.com/sound-effects/search/jumping%20game/?pagi=2 een goeie website.
+
 ## 🎮 Hoe te spelen
 
 - **Pijltjestoetsen ← →**: Beweeg de frikandel links en rechts
@@ -19,7 +21,7 @@ Vibe coded door de dochter met beetje typen hulp van papa.
 ## 🚀 Spelen
 
 ### Online spelen (GitHub Pages)
-🎮 **[Speel het spel hier!](https://jouw-username.github.io/vibecoded-game/)**
+🎮 **[Speel het spel hier!](https://woutersmet.github.io/vibecoded-game/)**
 
 ### Lokaal spelen
 1. Clone deze repository

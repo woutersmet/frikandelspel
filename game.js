@@ -97,7 +97,7 @@ const player = {
     velocityX: 0,
     velocityY: 0,
     onGround: false,
-    color: '#9069caff', // Bruine kleur voor frikandel
+    color: '#00FF00', // Groene kleur voor frikandel
     isDrogeWorst: false // Easter egg state
 };
 
@@ -214,7 +214,7 @@ document.addEventListener('keydown', (e) => {
             if (matches) {
                 konamiActivated = true;
                 player.isDrogeWorst = true;
-                player.color = '#8B4513'; // Darker brown for droge worst
+                player.color = '#62310eff'; // Darker brown for droge worst
                 console.log('🌭➡️🥩 KONAMI CODE ACTIVATED! Frikandel transformed into Droge Worst!');
             }
         }
@@ -224,7 +224,7 @@ document.addEventListener('keydown', (e) => {
     if (e.code === 'KeyR' && konamiActivated) {
         konamiActivated = false;
         player.isDrogeWorst = false;
-        player.color = '#9069caff'; // Reset to original frikandel color
+        player.color = '#00FF00'; // Reset to original green frikandel color
         konamiSequence = [];
         console.log('🥩➡️🌭 Easter egg reset! Back to normal frikandel!');
     }
@@ -339,7 +339,7 @@ function updatePlayer() {
     if (keys['Space'] && player.onGround) {
         player.velocityY = JUMP_FORCE;
         player.onGround = false;
-        // playSound('jumping');
+        playSound('jumping');
         stopWalkingSound(); // Stop walking sound when jumping
     }
     
